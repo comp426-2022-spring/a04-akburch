@@ -3,7 +3,7 @@ const app = express()
 const args = require('minimist')(process.argv.slice(2))
 const fs = require('fs')
 const morgan = require('morgan')
-const logdb = require('./database.js')
+const db = require('./database.js')
 
 const HTTP_PORT = args.port || process.env.PORT || 5555
 const log = args.log || true
