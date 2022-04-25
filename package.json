@@ -19,6 +19,7 @@
   "homepage": "https://github.com/comp426-2022-spring/a04-akburch#readme",
   "dependencies": {
     "express": "^4.17.3",
-    "minimist": "^1.2.6"
+    "minimist": "^1.2.6",
+    "morgan": "^1.10.0"
   }
 }
