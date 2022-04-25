@@ -57,10 +57,23 @@ if (log) {
 
         const info = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.protocol, logdata.httpversion, logdata.status, logdata.referer, logdata.useragent)
         next()
-    })
+    });
     const access = fs.createWriteStream('./accessLog.log', { flags: 'a' })
     // Set up the access logging middleware
     app.use(morgan('combined', { stream: access }))
+}
+//completely forgot this part lol
+
+if (debug) {
+    app.get('/app/log/access', (req, res, next) => {
+        const stmt = db.prepare('SELECT * FROM access').all()
+        res.status(200).json(stmt)
+        next()
+    });
+
+    app.get('/app/error', (res, req, next) => {
+        throw new Error('Error test successful.')
+    })
 }
 
 app.get('/app/', (req, res) => {
@@ -70,6 +83,30 @@ app.get('/app/', (req, res) => {
         res.statusMessage = 'OK';
         res.writeHead( res.statusCode, { 'Content-Type' : 'text/plain' });
         res.end(res.statusCode+ ' ' +res.statusMessage)
+    });
+
+// a03 endpoints
+
+app.get('/app/flip/', (req, res) => {
+    res.statusCode = 200;
+    res.writeHead(res.statusCode, {'Content-Type' : 'text/plain'});
+    res.end('{"flip":"' + coinFlip() + '"}')
+    });
+
+app.get('/app/flips/:number', (req, res) => {
+    var doAFlip = coinFlips(req.params.number)
+    var countThem = countFlips(doAFlip)
+    res.status(200).json({'raw' : doAFlip, 'summary' : countThem})
+    });
+
+app.get('/app/flip/call/:which(heads|tails)/', (req, res) => {
+    const guessing = flipACoin(req.params.which)
+    res.status(200).json(guessing)
+});
+
+// uh oh
+app.use(function(req, res) {
+    res.status(404).send('404 NOT FOUND')
     });
 
 
@@ -120,27 +157,3 @@ function flipACoin(call) {
     const finalResult = {call: call, flip: flipV, result: resultV};
     return finalResult;
     }
-
-// a03 endpoints
-
-app.get('/app/flip/', (req, res) => {
-    res.statusCode = 200;
-    res.writeHead(res.statusCode, {'Content-Type' : 'text/plain'});
-    res.end('{"flip":"' + coinFlip() + '"}')
-    });
-
-app.get('/app/flips/:number', (req, res) => {
-    var doAFlip = coinFlips(req.params.number)
-    var countThem = countFlips(doAFlip)
-    res.status(200).json({'raw' : doAFlip, 'summary' : countThem})
-    });
-
-app.get('/app/flip/call/:which(heads|tails)/', (req, res) => {
-    const guessing = flipACoin(req.params.which)
-    res.status(200).json(guessing)
-});
-
-// uh oh
-app.use(function(req, res) {
-    res.status(404).send('404 NOT FOUND')
-    });
